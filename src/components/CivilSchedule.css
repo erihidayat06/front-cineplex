@@ -1,0 +1,38 @@
+.schedule {
+  height: 100vh;
+}
+
+.background-img {
+  background-image: url('../image/cast/Civil/bg-civil-war.jpg');  
+  background-size: cover;
+  background-position: center;
+  padding: 20px 0;
+  color: white;
+  height: auto; /* Allow height to adjust based on content */
+  display: flex;
+  align-items: center;
+  width: 100%;
+  flex-wrap: wrap; /* Allow wrapping on smaller screens */
+}
+
+@media (max-width: 768px) {
+  .background-img {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .background-img .col-md-3, 
+  .background-img .col-md-9 {
+    width: 100%;
+    text-align: center;
+  }
+
+  .background-img .col-md-3 {
+    margin-top: 0;
+  }
+
+  .background-img img {
+    width: 80%;
+    margin: auto;
+  }
+}

@@ -1,0 +1,37 @@
+.schedule {
+  height: 100vh;
+}
+
+.background-image {
+  background-image: url('../image/cast/vina/background.jpg');  
+  background-size: cover;
+  background-position: center;
+  padding: 20px 0;
+  color: white;
+  height: auto;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .background-image {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .background-image .col-md-3, 
+  .background-image .col-md-9 {
+    width: 100%;
+    text-align: center;
+  }
+
+  .background-image .col-md-3 {
+    margin-top: 0;
+  }
+
+  .background-image img {
+    width: 80%;
+    margin: auto;
+  }
+}

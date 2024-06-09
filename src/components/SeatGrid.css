@@ -1,0 +1,26 @@
+.main-container {
+    margin: 100px auto;
+    max-width: 800px;
+  }
+  
+  .selected-seats {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-top: 10px;
+  }
+  
+  .total-price {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-top: 10px;
+    color: #28a745;
+  }
+  
+  .buy-button {
+    margin-bottom: 60px;
+    font-size: 1.2em;
+    padding: 10px 20px;
+    width: 25%;
+    align-self: center;
+  }
+  
