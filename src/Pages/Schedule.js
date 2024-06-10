@@ -1,13 +1,18 @@
 import React from "react";
-import MovieSchedule from '../components/MovieSchedule';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import MovieSchedule from "../components/movie/MovieSchedule";
+import "bootstrap/dist/css/bootstrap.min.css";
+import NabvarIn from "../components/NavbarIn";
+
+import Footer from "../components/Footer";
 
 const Schedule = () => {
-    return (
-        <div>
-            <MovieSchedule />
-        </div>
-    );
-}
+  return (
+    <div>
+      <NabvarIn />
+      <MovieSchedule />
+      <Footer />
+    </div>
+  );
+};
 
-export default Schedule
+export default Schedule;

@@ -1,26 +1,54 @@
 .main-container {
-    margin: 100px auto;
-    max-width: 800px;
-  }
-  
-  .selected-seats {
-    font-size: 1.2em;
-    font-weight: bold;
-    margin-top: 10px;
-  }
-  
-  .total-price {
-    font-size: 1.2em;
-    font-weight: bold;
-    margin-top: 10px;
-    color: #28a745;
-  }
-  
-  .buy-button {
-    margin-bottom: 60px;
-    font-size: 1.2em;
-    padding: 10px 20px;
-    width: 25%;
-    align-self: center;
-  }
-  
+  margin: 100px auto;
+  max-width: 800px;
+}
+
+.seat-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+  background-color: transparent; /* Ensure the table background is transparent */
+}
+
+.seat-table td {
+  padding: 5px;
+  border: none; /* Remove table cell borders */
+  background-color: transparent; /* Ensure each cell is transparent */
+}
+
+.seat-table .empty {
+  width: 30px; /* Adjust width of empty space as needed */
+  background-color: transparent; /* Ensure background is transparent */
+}
+
+.selected-seats,
+.total-price {
+  font-size: 1.2em;
+  margin-top: 10px;
+}
+
+.buy-button {
+  width: 100px;
+  margin-right: 10px;
+}
+
+.selected-seats {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.total-price {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-top: 10px;
+  color: #28a745;
+}
+
+.buy-button {
+  margin-bottom: 60px;
+  font-size: 1.2em;
+  padding: 10px 20px;
+  width: 25%;
+  align-self: center;
+}

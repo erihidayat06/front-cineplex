@@ -1,13 +1,13 @@
-import React from "react";
-import CashComponent from '../components/CashComponent';
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import React from "react";
+// import CashComponent from '../components/CashComponent';
+// import 'bootstrap/dist/css/bootstrap.min.css';
 
-const CashSchedule = () => {
-    return (
-        <div>
-            <CashComponent />
-        </div>
-    );
-}
+// const CashSchedule = () => {
+//     return (
+//         <div>
+//             <CashComponent />
+//         </div>
+//     );
+// }
 
-export default CashSchedule
+// export default CashSchedule

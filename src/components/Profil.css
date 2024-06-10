@@ -21,17 +21,19 @@
   box-sizing: border-box;
 }
 
-.cardprofil, .profilcard, .history-card {
+.cardprofil,
+.profilcard,
+.history-card {
   border: 1px solid #ddd;
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   transition: transform 0.2s;
 }
-
+/* 
 .cardprofil:hover, .profilcard:hover, .history-card:hover {
   transform: translateY(-10px);
-}
+} */
 
 .card-body {
   padding: 20px;
@@ -106,13 +108,13 @@
   border-bottom: none;
 }
 
-
 @media (max-width: 768px) {
   .col-md-6 {
     max-width: 100%;
   }
 
-  .profile-info, .profile-details {
+  .profile-info,
+  .profile-details {
     text-align: left;
   }
 }

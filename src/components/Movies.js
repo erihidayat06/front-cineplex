@@ -58,21 +58,29 @@ const MoviesSection = () => {
 
   return (
     <div id="movies">
+      <h1 className="fw-bold text-center">MOVIE</h1>
       <div className="row">
         <Slider {...settings}>
           {movies.map((movie) => (
-            <a href="#" key={movie.id} className="text-decoration-none">
+            <a
+              href={"/Schedule/" + movie.id_movie}
+              key={movie.id}
+              className="text-decoration-none">
               <div className="col">
-                <div className="card m-2 text-center">
+                <div className="card m-2 text-center card-movie">
                   <img
-                    src={imageBest(movie.picture)}
+                    src={imageBest(movie.picture_movie)}
                     alt={movie.name_film}
                     className="img-movie"
                   />
-                  <div className="card-footer name-movie">
+                  <div
+                    className="card-footer name-movie"
+                    style={{ backgroundColor: "#ffe500" }}>
                     <h5 className="fw-bold">{movie.name_film}</h5>
                   </div>
-                  <div className="card-footer buy-now">
+                  <div
+                    className="card-footer buy-now"
+                    style={{ backgroundColor: "#253740", color: "#fff" }}>
                     <h4 className="fw-bold">BUY NOW</h4>
                   </div>
                 </div>

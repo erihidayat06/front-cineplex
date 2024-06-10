@@ -5,15 +5,6 @@
   padding: 100px;
 }
 
-.buy-now {
-  background-color: #253740;
-  color: #fff;
-}
-
-.name-movie {
-  background-color: #ffe500;
-}
-
 .img-movie {
   border-radius: 5px 5px 0px 0px;
   width: 100%;
@@ -21,11 +12,11 @@
   height: 350px;
 }
 
-.card {
+.card-movie {
   transition: transform 0.2s;
 }
 
-.card:hover {
+.card-movie:hover {
   transform: scale(1.05);
 }
 

@@ -83,7 +83,7 @@ const Promotion = () => {
                     alt={promo.title}
                     className="foto-promo"
                   />
-                  <Card.Body>
+                  <Card.Body className="card-promotion">
                     {promo.title.split("\n").map((line, idx) => (
                       <h3 key={idx}>{line}</h3>
                     ))}
