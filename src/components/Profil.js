@@ -1,9 +1,41 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { PurchaseContext } from "./PurchaseContext";
+import { fetchTransactions } from "../services/api";
 import "./Profil.css";
+import axios from "axios";
+import { formatDate, formatTime } from "../utils/utils"; // Import function from utils.js
+
+// Load Midtrans Snap script dynamically
+const loadSnapScript = (src, onLoad) => {
+  const script = document.createElement("script");
+  script.src = src;
+  script.async = true;
+  script.onload = onLoad;
+  document.body.appendChild(script);
+};
 
 function Profile() {
+  const [transactions, setTransactions] = useState([]);
+
+  useEffect(() => {
+    const getTransactions = async () => {
+      try {
+        const transactionsData = await fetchTransactions();
+        console.log("Fetched transactions:", transactionsData); // Debug log
+        setTransactions(transactionsData);
+      } catch (error) {
+        console.error("Failed to fetch transactions:", error);
+      }
+    };
+
+    getTransactions();
+
+    // Load Snap script on component mount
+    loadSnapScript("https://app.sandbox.midtrans.com/snap/snap.js", () => {
+      window.snap.pay = window.snap.pay.bind(window.snap);
+    });
+  }, []);
+
   const navigate = useNavigate();
   const [showEdit, setShowEdit] = useState(false);
   const [profile, setProfile] = useState({
@@ -14,7 +46,6 @@ function Profile() {
     address: "",
     imageUrl: "https://via.placeholder.com/150",
   });
-  const { purchaseHistory } = useContext(PurchaseContext);
 
   const handleEdit = () => {
     setShowEdit(!showEdit);
@@ -41,6 +72,37 @@ function Profile() {
     }
   };
 
+  const updateTransactionStatus = async (order_id) => {
+    try {
+      await axios.put("http://localhost:5000/api/transaction/update", {
+        order_id: order_id,
+        status: "SUCCES", // Corrected status spelling
+      });
+      console.log("Order status updated to SUCCES");
+    } catch (error) {
+      console.error("Failed to update order status:", error);
+    }
+  };
+
+  const handleMidtransPayment = (token, order_id) => {
+    window.snap.pay(token, {
+      onSuccess: (result) => {
+        console.log(order_id);
+        console.log("Payment success:", result);
+        updateTransactionStatus(order_id); // Call updateTransactionStatus on success
+      },
+      onPending: (result) => {
+        console.log("Payment pending:", result);
+      },
+      onError: (result) => {
+        console.log("Payment error:", result);
+      },
+      onClose: () => {
+        console.log("Payment popup closed");
+      },
+    });
+  };
+
   return (
     <div className="profilcontainer">
       <div className="row rowtop">
@@ -51,7 +113,7 @@ function Profile() {
               <div className="profile-image">
                 <img
                   src={profile.imageUrl}
-                  alt="Profile Picture"
+                  alt="Profile"
                   style={{
                     maxWidth: "100%",
                     maxHeight: "300px",
@@ -163,14 +225,48 @@ function Profile() {
       <div className="history-card">
         <div className="card-body">
           <h3>Purchase History</h3>
-          {purchaseHistory.map((history) => (
-            <div key={history.id} className="history-item">
-              <p>{history.item}</p>
-              <p>{history.date}</p>
-              <p>Price: Rp.{history.price}</p>
-              <p>Show Time: {history.showTime}</p>
-            </div>
-          ))}
+          <hr></hr>
+          {transactions.length > 0 ? (
+            transactions.map((trans) => (
+              <div className="history-item">
+                <table style={{ width: "100%" }}>
+                  <thead>
+                    <tr>
+                      <th>Tanggal Order</th>
+                      <th>Judul Film</th>
+                      <th>Kursi</th>
+                      <th>Tanggal Tonton</th>
+                      <th>Jam Tonton</th>
+                      <th>Total Harga</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>{formatDate(trans.created_at)}</td>
+                      <td>{trans.name_film}</td>
+                      <td>{trans.seat}</td>
+                      <td>{formatDate(trans.dated)}</td>
+                      <td>{formatTime(trans.hour)}</td>
+                      <td>{trans.total}</td>
+                      <td>{trans.status}</td>
+                    </tr>
+                  </tbody>
+                </table>
+                {trans.status === "PROSES" && (
+                  <button
+                    className="btn btn-primary mt-2"
+                    onClick={() =>
+                      handleMidtransPayment(trans.token, trans.id_transaction)
+                    }>
+                    Pay Now
+                  </button>
+                )}
+              </div>
+            ))
+          ) : (
+            <p>No purchase history available.</p>
+          )}
         </div>
       </div>
     </div>

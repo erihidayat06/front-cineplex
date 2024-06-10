@@ -17,6 +17,21 @@ export const fetchMovies = async () => {
   }
 };
 
+export const fetchTransactions = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/transaction/get`);
+    if (response.data.status) {
+      return response.data.transactions.transaction;
+    } else {
+      console.error("Failed to fetch data:", response.data.message);
+      return [];
+    }
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    return [];
+  }
+};
+
 export const getById = async (id) => {
   try {
     const response = await axios.get(`${API_URL}/movie/${id}`);

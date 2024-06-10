@@ -270,7 +270,8 @@ const SeatGrid = () => {
                 className="bi bi-check-circle"
                 style={{ fontSize: "2rem", color: "green" }}></i>
             </div>
-            {modalContent}
+            <div style={{ color: "black" }}>{modalContent}</div>{" "}
+            {/* Set text color to black */}
           </div>
         </Modal.Body>
       </Modal>

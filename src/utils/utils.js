@@ -12,3 +12,11 @@ export const imageBest = (file) => {
 
   return imagesUrl;
 };
+
+export const formatTime = (timeString) => {
+  // Split the timeString by the colon
+  const [hours, minutes] = timeString.split(":");
+
+  // Return formatted time in HH:MM format
+  return `${hours}:${minutes}`;
+};

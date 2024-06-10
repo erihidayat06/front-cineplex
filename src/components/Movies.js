@@ -3,7 +3,7 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { fetchMovies } from "../services/api"; // Import function from api.js
-import { formatDate, imageBest } from "../utils/utils"; // Import function from utils.js
+import { imageBest } from "../utils/utils"; // Import function from utils.js
 import "./Movies.css";
 
 const MoviesSection = () => {
@@ -58,7 +58,7 @@ const MoviesSection = () => {
 
   return (
     <div id="movies">
-      <h1 className="fw-bold text-center">MOVIE</h1>
+      <h1 className="fw-bold text-center">MOVIES</h1>
       <div className="row">
         <Slider {...settings}>
           {movies.map((movie) => (
