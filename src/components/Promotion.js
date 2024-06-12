@@ -1,19 +1,29 @@
-import React from "react";
-import { Card } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { Card, ModalFooter } from "react-bootstrap";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import diskon50 from "../image/promo/diskon-50.png";
-import buy1get1 from "../image/promo/buy-1-get-1.png";
-import movie from "../image/promo/movie.png";
-import diskon30 from "../image/promo/diskon-30.png";
-import bca from "../image/promo/bca.jpeg";
-import promocola from "../image/promo/promocola.jpeg";
 import ticket from "../image/icon/ticket.jpg";
 import snack from "../image/icon/snack.jpg";
+import Button from "react-bootstrap/Button";
+import Modal from "react-bootstrap/Modal";
 import "./Promotion.css";
+import { fetchPromo } from "../services/api"; // Import function from api.js
+import { imageBest } from "../utils/utils"; // Import function from utils.js
 
 const Promotion = () => {
+  const [Promotions, setPromotions] = useState([]);
+  const [selectedPromotion, setSelectedPromotion] = useState(null);
+
+  useEffect(() => {
+    const getPromotions = async () => {
+      const promotionsData = await fetchPromo();
+      setPromotions(promotionsData);
+    };
+
+    getPromotions();
+  }, []);
+
   const settings = {
     dots: true,
     infinite: true,
@@ -48,14 +58,8 @@ const Promotion = () => {
     ],
   };
 
-  const promotions = [
-    { img: diskon50, title: "Diskon 50% Untuk Member Baru", link: "#diskon50" },
-    { img: buy1get1, title: "Promo Beli 1\nGratis 1", link: "#buy1get1" },
-    { img: movie, title: "Movie Treats Hanya 99K", link: "#movie" },
-    { img: diskon30, title: "Promo Spesial 30%", link: "#diskon30" },
-    { img: bca, title: "Voucher Nonton\nRp. 100 Ribu", link: "#bca" },
-    { img: promocola, title: "PROMO WITH\nCOCA COLA", link: "#promocola" },
-  ];
+  const handleShow = (promo) => setSelectedPromotion(promo);
+  const handleClose = () => setSelectedPromotion(null);
 
   return (
     <div id="promotion" className="promotion">
@@ -73,27 +77,54 @@ const Promotion = () => {
       </div>
       <div className="container">
         <Slider {...settings}>
-          {promotions.map((promo, index) => (
+          {Promotions.map((promo, index) => (
             <div key={index}>
-              <a href={promo.link} className="promotion-link">
-                <Card className="promotion-card m-2 shadow">
-                  <Card.Img
-                    variant="top"
-                    src={promo.img}
-                    alt={promo.title}
-                    className="foto-promo"
-                  />
-                  <Card.Body className="card-promotion">
-                    {promo.title.split("\n").map((line, idx) => (
-                      <h3 key={idx}>{line}</h3>
-                    ))}
-                  </Card.Body>
-                </Card>
-              </a>
+              <Card
+                className="promotion-card m-2 shadow"
+                style={{ cursor: "pointer" }}
+                onClick={() => handleShow(promo)}>
+                <Card.Img
+                  variant="top"
+                  src={imageBest(promo.picture)}
+                  alt={promo.title}
+                  className="foto-promo"
+                />
+                <Card.Body className="card-promotion">
+                  {promo.title.split("\n").map((line, idx) => (
+                    <h3 key={idx}>{line}</h3>
+                  ))}
+                </Card.Body>
+              </Card>
             </div>
           ))}
         </Slider>
       </div>
+
+      {selectedPromotion && (
+        <Modal show={true} onHide={handleClose} size="lg">
+          <Modal.Header closeButton className=" card-costum">
+            <Modal.Title>{selectedPromotion.title}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body className=" card-costum">
+            <div className="container-fluid">
+              <div className="row">
+                <div className="col-md-6">
+                  <img
+                    src={imageBest(selectedPromotion.picture)}
+                    alt={selectedPromotion.title}
+                    className="img-fluid"
+                  />
+                </div>
+                <div className="col-md-6">
+                  <h3>{selectedPromotion.title}</h3>
+                  <p>{selectedPromotion.fill}</p>
+                </div>
+              </div>
+            </div>
+          </Modal.Body>
+          <Modal.Footer style={{ backgroundColor: "#365260" }}></Modal.Footer>
+        </Modal>
+      )}
     </div>
   );
 };

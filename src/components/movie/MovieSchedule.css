@@ -61,6 +61,10 @@
   object-fit: inherit;
 }
 
+.footer-cast {
+  height: 100px;
+}
+
 .background-image::before {
   content: "";
   position: absolute;

@@ -7,6 +7,15 @@ export const formatDate = (dateString) => {
   return formattedDate;
 };
 
+export const formatMovieDate = (dateString) => {
+  const options = { day: "numeric", month: "long" };
+  const formattedDate = new Date(dateString).toLocaleDateString(
+    "id-ID",
+    options
+  );
+  return formattedDate;
+};
+
 export const imageBest = (file) => {
   const imagesUrl = "http://localhost:5000/uploads/" + file;
 

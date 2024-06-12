@@ -8,6 +8,7 @@ import { getById } from "../../services/api";
 //import hook history dan params dari react router dom
 import { useParams, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
+import LoadingAnimation from "../LoadingAnimation";
 
 const MovieSchedule = () => {
   // Get ID from parameter URL
@@ -19,7 +20,6 @@ const MovieSchedule = () => {
   const [show, setShow] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedTime, setSelectedTime] = useState(null);
   const [dates, setDates] = useState([]);
   const [availableTimes, setAvailableTimes] = useState([]);
 
@@ -67,7 +67,14 @@ const MovieSchedule = () => {
     }
   }, [selectedDate, movie]);
 
-  const handleShow = () => setShow(true);
+  const handleShow = () => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      setShow(true);
+    } else {
+      setShow(false);
+    }
+  };
   const handleClose = () => setShow(false);
 
   const addReview = (review) => {
@@ -75,7 +82,7 @@ const MovieSchedule = () => {
   };
 
   if (!movie) {
-    return <div>Loading...</div>; // Handle the loading state
+    return <LoadingAnimation />; // Show the loading animation
   }
 
   const calculateAverageRating = (votes) => {
@@ -108,12 +115,12 @@ const MovieSchedule = () => {
       <div
         className="background-image p-5"
         style={{
-          backgroundImage: `url(${imageBest(movie.movie.picture_movie)})`,
+          backgroundImage: `url(${imageBest(movie.movie.picture)})`,
         }}>
         <div className="row row-cols-1 row-cols-lg-3">
           <div className="col-lg-2 d-flex ">
             <img
-              src={imageBest(movie.movie.picture_movie)}
+              src={imageBest(movie.movie.picture)}
               className="shadow object-fit-cover border rounded img-film card-movie"
               alt="Movie Poster"
             />
@@ -189,7 +196,7 @@ const MovieSchedule = () => {
                               alt="Actor"
                               className="rounded-top img-cast"
                             />
-                            <div className="card-footer text-center">
+                            <div className="card-footer text-center footer-cast">
                               <h5>{act.name_actor}</h5>
                               <h6>{act.cast}</h6>
                             </div>
@@ -279,67 +286,6 @@ const MovieSchedule = () => {
                         <hr></hr>
                       </div>
                     ))}
-                  </div>
-                </div>
-              </div>
-            </Tab>
-            <Tab eventKey="showtime" title="Show Time">
-              <div className="tab-content tabs">
-                <div className="tab-pane fade in active show" id="Section3">
-                  <div style={{ textAlign: "left", paddingTop: "5%" }}>
-                    <h4>Jadwal</h4>
-                    <div className="d-flex">
-                      {dates.map((date) => (
-                        <Button
-                          key={date.day}
-                          variant={
-                            selectedDate === date.day
-                              ? "primary"
-                              : "outline-secondary"
-                          }
-                          onClick={() => setSelectedDate(date.day)}
-                          className="me-2">
-                          {date.day} <br /> {date.name}
-                        </Button>
-                      ))}
-                    </div>
-                    <h4 className="mt-4">Jam Tayang</h4>
-                    <div className="d-flex">
-                      {availableTimes.map((time) => (
-                        <Button
-                          key={time}
-                          variant={
-                            selectedTime === time
-                              ? "primary"
-                              : "outline-secondary"
-                          }
-                          onClick={() => setSelectedTime(time)}
-                          className="me-2">
-                          {format(new Date(`2000-01-01 ${time}`), "HH:mm")}
-                        </Button>
-                      ))}
-                    </div>
-                    <div className="d-flex justify-content-start mt-4 mb-5">
-                      <Button
-                        variant="danger"
-                        className="me-2"
-                        onClick={() => navigate("/")}>
-                        Kembali
-                      </Button>
-                      <Button
-                        variant="success"
-                        disabled={!selectedDate || !selectedTime}
-                        onClick={() => {
-                          console.log(
-                            "Buying ticket for",
-                            selectedDate,
-                            selectedTime
-                          );
-                          // Implement your ticket buying logic here
-                        }}>
-                        Beli Tiket
-                      </Button>
-                    </div>
                   </div>
                 </div>
               </div>

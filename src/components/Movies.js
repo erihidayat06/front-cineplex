@@ -23,7 +23,7 @@ const MoviesSection = () => {
     infinite: true,
     speed: 500,
     slidesToShow: 5,
-    slidesToScroll: 1,
+    slidesToScroll: 3,
     responsive: [
       {
         breakpoint: 1200,
@@ -58,25 +58,27 @@ const MoviesSection = () => {
 
   return (
     <div id="movies">
-      <h1 className="fw-bold text-center">MOVIES</h1>
+      <h1 className="fw-bold text-center text-movie">
+        MOVIES | DP MALL XXI Semarang
+      </h1>
       <div className="row">
         <Slider {...settings}>
           {movies.map((movie) => (
             <a
-              href={"/Schedule/" + movie.id_movie}
-              key={movie.id}
+              href={"/movie/" + movie.id_movie}
+              key={movie.id_movie}
               className="text-decoration-none">
               <div className="col">
                 <div className="card m-2 text-center card-movie">
                   <img
-                    src={imageBest(movie.picture_movie)}
+                    src={imageBest(movie.picture)}
                     alt={movie.name_film}
                     className="img-movie"
                   />
                   <div
                     className="card-footer name-movie"
                     style={{ backgroundColor: "#ffe500" }}>
-                    <h5 className="fw-bold">{movie.name_film}</h5>
+                    <h5 className="fw-bold text-truncate">{movie.name_film}</h5>
                   </div>
                   <div
                     className="card-footer buy-now"

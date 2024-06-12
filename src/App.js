@@ -10,6 +10,7 @@ import CivilSchedule from "./Pages/CivilSchedule";
 import CashSchedule from "./Pages/CashSchedule";
 import MyProfil from "./Pages/MyProfil";
 import Signin from "./Pages/Signin";
+import Tiket from "./Pages/Tiket";
 import Register from "./components/Signup";
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -20,13 +21,14 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Cine />} />
           <Route path="/SeatBuy/:id" element={<SeatBuy />} />
-          <Route path="/Schedule/:id" element={<Schedule />} />
+          <Route path="/movie/:id" element={<Schedule />} />
           <Route path="/MadSchedule" element={<MadSchedule />} />
           <Route path="/CivilSchedule" element={<CivilSchedule />} />
           <Route path="/CashSchedule" element={<CashSchedule />} />
           <Route path="/MyProfil" element={<MyProfil />} />
-          <Route path="/Signin" element={<Signin />} />
+          <Route path="/sign" element={<Signin />} />
           <Route path="/Register" element={<Register />} />
+          <Route path="/tiket" element={<Tiket />} />
         </Routes>
       </Router>
     </PurchaseProvider>

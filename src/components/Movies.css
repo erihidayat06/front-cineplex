@@ -25,6 +25,11 @@
   transition: font-size 0.2s;
 }
 
+.text-movie {
+  text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000,
+    2px 2px 0 #000;
+}
+
 @media (max-width: 1200px) {
   .card {
     width: 90%;

@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Navbar, Nav, Container, FormControl, Button } from "react-bootstrap";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { Navbar, Nav, Container, Button } from "react-bootstrap";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./NavbarIn.css";
+import { getUser } from "../services/auth";
 
 const NavbarIn = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [activeItem, setActiveItem] = useState("home");
-  const [isSearchClicked, setIsSearchClicked] = useState(false);
-  const navigate = useNavigate(); // Initialize useNavigate
+  const [activeItem, setActiveItem] = useState("/"); // Default ke "/"
+  const [user, setUser] = useState(null); // Initialize with null for better handling
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -21,12 +23,25 @@ const NavbarIn = () => {
     };
   }, []);
 
+  useEffect(() => {
+    // Set activeItem berdasarkan path URL saat ini
+    setActiveItem(location.pathname);
+  }, [location]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      setUser(getUser(token));
+    }
+  }, []); // Empty dependency array to run only once on mount
+
   const handleNavItemClick = (item) => {
     setActiveItem(item);
+    navigate(item);
   };
 
-  const handleSearchClick = () => {
-    setIsSearchClicked((prevState) => !prevState);
+  const handleSignInClick = () => {
+    navigate("/sign"); // Navigate to the login page
   };
 
   return (
@@ -38,7 +53,7 @@ const NavbarIn = () => {
         } mt-0`}
         style={{ paddingTop: "5px" }}>
         <Container>
-          <Navbar.Brand href="#home" className="brand-custom">
+          <Navbar.Brand href="/" className="brand-custom">
             <span className="cine">Cine</span>
             <span className="plex">plex+</span>
           </Navbar.Brand>
@@ -48,11 +63,11 @@ const NavbarIn = () => {
             className="justify-content-end">
             <Nav className="mx-auto">
               <Nav.Link
-                href="/#home"
+                href="/"
                 className={`nav-link-custom ${
-                  activeItem === "home" ? "active" : ""
+                  activeItem === "/" ? "active" : ""
                 }`}
-                onClick={() => handleNavItemClick("home")}
+                onClick={() => handleNavItemClick("/")}
                 style={{ color: "white" }}>
                 Home
               </Nav.Link>
@@ -62,7 +77,7 @@ const NavbarIn = () => {
                 className={`nav-link-custom ${
                   activeItem === "movies" ? "active" : ""
                 }`}
-                onClick={() => handleNavItemClick("movies")}
+                onClick={() => handleNavItemClick("/#movies")}
                 style={{ color: "white" }}>
                 Movies
               </Nav.Link>
@@ -72,7 +87,7 @@ const NavbarIn = () => {
                 className={`nav-link-custom ${
                   activeItem === "promotion" ? "active" : ""
                 }`}
-                onClick={() => handleNavItemClick("promotion")}
+                onClick={() => handleNavItemClick("/#promotion")}
                 style={{ color: "white" }}>
                 Promotion
               </Nav.Link>
@@ -82,51 +97,41 @@ const NavbarIn = () => {
                 className={`nav-link-custom ${
                   activeItem === "contact" ? "active" : ""
                 }`}
-                onClick={() => handleNavItemClick("contact")}
+                onClick={() => handleNavItemClick("/#contact")}
                 style={{ color: "white" }}>
                 Contact
               </Nav.Link>
 
-              <Nav.Link
-                href="#search"
-                className={`nav-link-custom ${
-                  activeItem === "search" ? "active" : ""
-                }`}
-                onClick={() => {
-                  handleNavItemClick("search");
-                  handleSearchClick();
-                }}
-                style={{ color: "white" }}>
-                <i
-                  className={`bi bi-search ${
-                    isSearchClicked ? "clicked" : ""
-                  }`}></i>
-              </Nav.Link>
+              {user && (
+                <Nav.Link
+                  href="/tiket"
+                  className={`nav-link-custom ${
+                    activeItem === "/tiket" ? "active" : ""
+                  }`}
+                  onClick={() => handleNavItemClick("/tiket")}
+                  style={{ color: "white" }}>
+                  <i className="bi bi-ticket-perforated p-1"></i> Tiket
+                </Nav.Link>
+              )}
             </Nav>
             <Nav className="align-items-center">
-              <FormControl
-                type="text"
-                placeholder="Search"
-                className={`mr-sm-2 search-input ${
-                  isSearchClicked ? "expanded" : ""
-                }`}
-              />
-              {isSearchClicked && (
-                <Button variant="outline-success" className="search-button">
-                  Search
+              {user ? (
+                <Nav.Link
+                  className={`nav-link-custom ${
+                    activeItem === "/MyProfil" ? "active" : ""
+                  }`}
+                  onClick={() => handleNavItemClick("/MyProfil")}
+                  style={{ color: "white" }}>
+                  <i className="bi bi-person"></i>
+                </Nav.Link>
+              ) : (
+                <Button
+                  variant="outline-light"
+                  onClick={handleSignInClick}
+                  className="sign-in-button">
+                  Sign In
                 </Button>
               )}
-              <Nav.Link
-                className={`nav-link-custom ${
-                  activeItem === "profile" ? "active" : ""
-                }`}
-                onClick={() => {
-                  handleNavItemClick("profile");
-                  navigate("/MyProfil");
-                }}
-                style={{ color: "white" }}>
-                <i className="bi bi-person"></i>
-              </Nav.Link>
             </Nav>
           </Navbar.Collapse>
         </Container>

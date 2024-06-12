@@ -1,17 +1,17 @@
 import React from "react";
-import Profil from "../components/Profil";
+import Tiket from "../components/Tiket";
 import Footer from "../components/Footer";
 import NabvarIn from "../components/NavbarIn";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-const MyProfil = () => {
+const MyTiket = () => {
   return (
     <div>
       <NabvarIn />
-      <Profil />
+      <Tiket />
       <Footer />
     </div>
   );
 };
 
-export default MyProfil;
+export default MyTiket;

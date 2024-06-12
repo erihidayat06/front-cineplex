@@ -4,6 +4,7 @@ import { fetchTransactions } from "../services/api";
 import "./Profil.css";
 import axios from "axios";
 import { formatDate, formatTime } from "../utils/utils"; // Import function from utils.js
+import { getUser } from "../services/auth";
 
 // Load Midtrans Snap script dynamically
 const loadSnapScript = (src, onLoad) => {
@@ -15,28 +16,9 @@ const loadSnapScript = (src, onLoad) => {
 };
 
 function Profile() {
-  const [transactions, setTransactions] = useState([]);
-
-  useEffect(() => {
-    const getTransactions = async () => {
-      try {
-        const transactionsData = await fetchTransactions();
-        console.log("Fetched transactions:", transactionsData); // Debug log
-        setTransactions(transactionsData);
-      } catch (error) {
-        console.error("Failed to fetch transactions:", error);
-      }
-    };
-
-    getTransactions();
-
-    // Load Snap script on component mount
-    loadSnapScript("https://app.sandbox.midtrans.com/snap/snap.js", () => {
-      window.snap.pay = window.snap.pay.bind(window.snap);
-    });
-  }, []);
-
   const navigate = useNavigate();
+  const [transactions, setTransactions] = useState([]);
+  const [user, setUser] = useState(null);
   const [showEdit, setShowEdit] = useState(false);
   const [profile, setProfile] = useState({
     fullName: "",
@@ -47,9 +29,36 @@ function Profile() {
     imageUrl: "https://via.placeholder.com/150",
   });
 
-  const handleEdit = () => {
-    setShowEdit(!showEdit);
-  };
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      setUser(getUser(token));
+    } else {
+      navigate("/"); // Redirect to home if no token
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    const getTransactions = async () => {
+      try {
+        const transactionsData = await fetchTransactions(user.userid); // Mengambil transaksi berdasarkan ID pengguna
+        console.log("Fetched transactions:", transactionsData); // Debug log
+        setTransactions(transactionsData);
+      } catch (error) {
+        console.error("Failed to fetch transactions:", error);
+      }
+    };
+
+    if (user) {
+      // Pastikan user tidak null sebelum mengambil transaksi
+      getTransactions();
+    }
+
+    // Load Snap script on component mount
+    loadSnapScript("https://app.sandbox.midtrans.com/snap/snap.js", () => {
+      window.snap.pay = window.snap.pay.bind(window.snap);
+    });
+  }, [user]); // Tambahkan user sebagai dependency agar efek berjalan saat user berubah
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -72,13 +81,18 @@ function Profile() {
     }
   };
 
+  const Logout_user = () => {
+    localStorage.removeItem("token");
+    navigate("/");
+  };
+
   const updateTransactionStatus = async (order_id) => {
     try {
       await axios.put("http://localhost:5000/api/transaction/update", {
         order_id: order_id,
-        status: "SUCCES", // Corrected status spelling
+        status: "SUCCESS", // Corrected status spelling
       });
-      console.log("Order status updated to SUCCES");
+      console.log("Order status updated to SUCCESS");
     } catch (error) {
       console.error("Failed to update order status:", error);
     }
@@ -103,44 +117,22 @@ function Profile() {
     });
   };
 
+  if (!user) {
+    return null; // Render nothing if no user data is available yet
+  }
+
   return (
     <div className="profilcontainer">
       <div className="row rowtop">
-        {/* First Card: Display Profile Information */}
-        <div className="col-md-6 profile">
-          <div className="cardprofil">
-            <div className="card-body">
-              <div className="profile-image">
-                <img
-                  src={profile.imageUrl}
-                  alt="Profile"
-                  style={{
-                    maxWidth: "100%",
-                    maxHeight: "300px",
-                    objectFit: "cover",
-                  }}
-                />
-              </div>
-              <div className="profile-info">
-                <h2>{profile.fullName}</h2>
-                <p>{profile.email}</p>
-              </div>
-              <button
-                className="btn btn-danger mt-3"
-                onClick={() => navigate("/")}>
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-
         {/* Second Card: Edit Profile Information */}
-        <div className="col-md-6 profile">
+        <div className="col-md-6 profile text-dark">
           <div className="profilcard">
             <div className="card-body">
               <div className="profile-details">
                 <div className="detail-item">
-                  <label htmlFor="fullName">Full Name:</label>
+                  <label className="text-white" htmlFor="fullName">
+                    Full Name:
+                  </label>
                   {showEdit ? (
                     <input
                       type="text"
@@ -150,13 +142,13 @@ function Profile() {
                       className="form-control"
                     />
                   ) : (
-                    <span className="form-control-static">
-                      {profile.fullName}
-                    </span>
+                    <span className="form-control-static">{user.username}</span>
                   )}
                 </div>
                 <div className="detail-item">
-                  <label htmlFor="email">Email:</label>
+                  <label className="text-white" htmlFor="email">
+                    Email:
+                  </label>
                   {showEdit ? (
                     <input
                       type="email"
@@ -166,11 +158,13 @@ function Profile() {
                       className="form-control"
                     />
                   ) : (
-                    <span className="form-control-static">{profile.email}</span>
+                    <span className="form-control-static">{user.email}</span>
                   )}
                 </div>
                 <div className="detail-item">
-                  <label htmlFor="phone">Phone:</label>
+                  <label className="text-white" htmlFor="phone">
+                    Phone:
+                  </label>
                   {showEdit ? (
                     <input
                       type="tel"
@@ -180,28 +174,15 @@ function Profile() {
                       className="form-control"
                     />
                   ) : (
-                    <span className="form-control-static">{profile.phone}</span>
+                    <span className="form-control-static">{user.no_telp}</span>
                   )}
                 </div>
-                <div className="detail-item">
-                  <label htmlFor="address">Address:</label>
-                  {showEdit ? (
-                    <input
-                      type="text"
-                      id="address"
-                      value={profile.address}
-                      onChange={handleChange}
-                      className="form-control"
-                    />
-                  ) : (
-                    <span className="form-control-static">
-                      {profile.address}
-                    </span>
-                  )}
-                </div>
+
                 {showEdit && (
                   <div className="detail-item">
-                    <label htmlFor="profileImage">Profile Image:</label>
+                    <label className="text-white" htmlFor="profileImage">
+                      Profile Image:
+                    </label>
                     <input
                       type="file"
                       id="profileImage"
@@ -210,12 +191,12 @@ function Profile() {
                     />
                   </div>
                 )}
-                <button
-                  className="btn btn-primary edit-button"
-                  onClick={handleEdit}>
-                  {showEdit ? "Save" : "Edit"}
-                </button>
               </div>
+              <button
+                className="btn btn-danger mt-3"
+                onClick={() => Logout_user()}>
+                Logout
+              </button>
             </div>
           </div>
         </div>
@@ -228,7 +209,7 @@ function Profile() {
           <hr></hr>
           {transactions.length > 0 ? (
             transactions.map((trans) => (
-              <div className="history-item">
+              <div className="history-item" key={trans.id_transaction}>
                 <table style={{ width: "100%" }}>
                   <thead>
                     <tr>

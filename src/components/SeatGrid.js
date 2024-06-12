@@ -6,6 +6,9 @@ import "./SeatGrid.css";
 import { getById } from "../services/api";
 import { format } from "date-fns";
 import axios from "axios";
+import { getUser } from "../services/auth";
+import LoadingAnimation from "./LoadingAnimation";
+import { formatMovieDate } from "../utils/utils"; // Import function from utils.js
 
 const SeatGrid = () => {
   const { id } = useParams();
@@ -16,11 +19,22 @@ const SeatGrid = () => {
   const [dates, setDates] = useState([]);
   const [availableTimes, setAvailableTimes] = useState([]);
   const [selectedSeats, setSelectedSeats] = useState([]);
+  const [unavailableSeats, setUnavailableSeats] = useState([]); // State for unavailable seats
   const [showModal, setShowModal] = useState(false);
   const [modalContent, setModalContent] = useState("");
+  const [user, setUser] = useState(null); // State for user
   const totalRows = 11; // Rows A to K (11 rows)
   const totalCols = 14; // 14 seats per row
   const seatPrice = 35000; // Harga per kursi
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      setUser(getUser(token));
+    } else {
+      navigate("/sign"); // Redirect to login page if not logged in
+    }
+  }, [navigate]);
 
   const handleSelectSeat = (seatNumber) => {
     setSelectedSeats((prevSelectedSeats) =>
@@ -47,12 +61,14 @@ const SeatGrid = () => {
 
         moviesData.times.forEach((time) => {
           const date = new Date(time.dated);
-          const day = format(date, "dd");
-          const name = format(date, "EEEE");
+          const formattedDate = format(date, "yyyy-MM-dd"); // Format the date
+          const day = format(date, "ddddd");
+          const name = format(date, "EEE");
 
-          if (!dateMap.has(day)) {
-            dateMap.set(day, { day, name });
-            uniqueDates.push({ day, name });
+          if (!dateMap.has(formattedDate)) {
+            // Use formattedDate here
+            dateMap.set(formattedDate, { day: formattedDate, name });
+            uniqueDates.push({ day: formattedDate, name }); // Push formatted date
           }
         });
 
@@ -73,7 +89,9 @@ const SeatGrid = () => {
   useEffect(() => {
     if (selectedDate && movie) {
       const timesForDate = movie.times
-        .filter((time) => format(new Date(time.dated), "dd") === selectedDate)
+        .filter(
+          (time) => format(new Date(time.dated), "yyyy-MM-dd") === selectedDate
+        ) // Use formatted date here
         .map((time) => time.hour);
       setAvailableTimes(timesForDate);
     }
@@ -91,13 +109,67 @@ const SeatGrid = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      if (selectedTime) {
+        try {
+          const response = await axios.get(
+            "http://localhost:5000/api/transaction/get"
+          );
+          const transactions = response.data.transactions.transaction;
+
+          // Filter transactions based on selected time
+          const filteredTransactions = transactions.filter(
+            (transaction) => transaction.hour === selectedTime,
+            (transaction) => transaction.dated === selectedDate,
+            (transaction) => transaction.id_movie === id
+          );
+
+          // Extract seats from filtered transactions
+          const seats = filteredTransactions.flatMap((transaction) =>
+            JSON.parse(transaction.seat)
+          );
+
+          console.log("Filtered Transactions:", filteredTransactions);
+          console.log("Unavailable Seats:", seats);
+
+          setUnavailableSeats(seats);
+        } catch (error) {
+          console.error("Failed to fetch transactions:", error);
+        }
+      }
+    };
+
+    fetchTransactions();
+  }, [selectedTime, movie]);
+
   const handleOrder = async () => {
+    // Check if any selected seat is already booked
+    const overlappingSeats = selectedSeats.filter((seat) =>
+      unavailableSeats.includes(seat)
+    );
+
+    // If there are overlapping seats, display an alert
+    if (overlappingSeats.length > 0) {
+      alert(
+        `The following seats are already booked: ${overlappingSeats.join(", ")}`
+      );
+      return; // Do not proceed with the order
+    }
+
+    // Proceed with the order process
+    if (!user) {
+      // If user is not logged in, redirect to login page
+      navigate("/sign");
+      return;
+    }
+
     const random12DigitNumber = generateRandomNumber();
     const totalPrice = selectedSeats.length * seatPrice;
     const selectedTimeObject = movie.times.find(
       (time) => time.hour === selectedTime
-    ); // Temukan objek waktu yang sesuai
-    const id_time = selectedTimeObject ? selectedTimeObject.id_time : null; // Ambil id_time atau null jika tidak ditemukan
+    );
+    const id_time = selectedTimeObject ? selectedTimeObject.id_time : null;
 
     const orderData = {
       order_id: random12DigitNumber,
@@ -109,12 +181,12 @@ const SeatGrid = () => {
       movie_id: movie.movie.id_movie,
       movie_price: totalPrice,
       movie_categori: movie.movie.name_genre,
-      id_time: id_time, // Gunakan id_time yang telah ditemukan atau null
+      id_time: id_time,
       id_movie: movie.movie.id_movie,
-      id_user: "1",
-      name: "Eri Hidayat", // Dummy first name
-      email: "johndoe@gmail.com", // Dummy email
-      phone: "08123456789", // Dummy phone
+      id_user: user.userid,
+      name: user.username,
+      email: user.email,
+      phone: user.no_telp,
     };
 
     try {
@@ -179,11 +251,13 @@ const SeatGrid = () => {
   };
 
   if (!movie) {
-    return <div>Loading...</div>; // Handle the loading state
+    return <LoadingAnimation />;
   }
 
   const renderSeats = () => {
     const rowLabels = "ABCDEFGHIJK";
+    const excludedSeats = unavailableSeats; // Daftar kursi yang akan dikecualikan
+
     return (
       <Table className="seat-table">
         <tbody>
@@ -192,31 +266,44 @@ const SeatGrid = () => {
             return (
               <tr key={rowIndex}>
                 {Array.from({ length: totalCols }).map((_, colIndex) => {
+                  const seatNumber = `${rowLabel}${colIndex + 1}`;
+
+                  // Jika seatNumber ada dalam daftar pengecualian, tampilkan tombol merah
+                  if (excludedSeats.includes(seatNumber)) {
+                    return (
+                      <td key={seatNumber}>
+                        <button className="btn btn-danger kursi-kosong">
+                          {seatNumber}
+                        </button>
+                      </td>
+                    );
+                  }
+
                   if (colIndex === 9) {
                     return (
-                      <>
+                      <React.Fragment key={`gap-${rowIndex}`}>
                         <td key={`gap-${rowIndex}-1`} className="empty"></td>
                         <td key={`gap-${rowIndex}-2`} className="empty"></td>
                         <td key={`gap-${rowIndex}-3`} className="empty"></td>
-                        <td key={`${rowLabel}${colIndex + 1}`}>
+                        <td key={seatNumber}>
                           <Seat
-                            seatNumber={`${rowLabel}${colIndex + 1}`}
-                            isSelected={selectedSeats.includes(
-                              `${rowLabel}${colIndex + 1}`
+                            seatNumber={seatNumber}
+                            isSelected={selectedSeats.includes(seatNumber)}
+                            isUnavailable={unavailableSeats.includes(
+                              seatNumber
                             )}
                             onSelect={handleSelectSeat}
                           />
                         </td>
-                      </>
+                      </React.Fragment>
                     );
                   }
                   return (
-                    <td key={`${rowLabel}${colIndex + 1}`}>
+                    <td key={seatNumber}>
                       <Seat
-                        seatNumber={`${rowLabel}${colIndex + 1}`}
-                        isSelected={selectedSeats.includes(
-                          `${rowLabel}${colIndex + 1}`
-                        )}
+                        seatNumber={seatNumber}
+                        isSelected={selectedSeats.includes(seatNumber)}
+                        isUnavailable={unavailableSeats.includes(seatNumber)}
                         onSelect={handleSelectSeat}
                       />
                     </td>
@@ -232,7 +319,9 @@ const SeatGrid = () => {
 
   return (
     <Container className="mt-5">
-      <h4 style={{ marginTop: "100px" }}>Jadwal</h4>
+      <h1 style={{ marginTop: "100px" }}>Movie : {movie.movie.name_film}</h1>
+      <hr />
+      <h4>Jadwal</h4>
       <div className="d-flex">
         {dates.map((date) => (
           <Button
@@ -240,9 +329,9 @@ const SeatGrid = () => {
             variant={
               selectedDate === date.day ? "primary" : "outline-secondary"
             }
-            onClick={() => setSelectedDate(date.day)}
+            onClick={() => setSelectedDate(date.day)} // Set selected date
             className="me-2">
-            {date.day} <br /> {date.name}
+            {formatMovieDate(date.day)} <br /> {date.name}
           </Button>
         ))}
       </div>
@@ -258,6 +347,7 @@ const SeatGrid = () => {
           </Button>
         ))}
       </div>
+
       <hr></hr>
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
@@ -276,6 +366,11 @@ const SeatGrid = () => {
         </Modal.Body>
       </Modal>
       {renderSeats()}
+      <div className="screen-container">
+        <div className="screen"></div>
+        Cinema Screen here
+      </div>
+
       <div className="mt-3">
         <div className="selected-seats">
           Selected Seats: {selectedSeats.join(", ")}
@@ -284,9 +379,10 @@ const SeatGrid = () => {
           Total Price: Rp.{selectedSeats.length * seatPrice}
         </div>
       </div>
+
       <div className="mt-3 d-flex justify-content-end">
         <Button
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/movie/" + movie.movie.id_movie)}
           variant="danger"
           className="mr-2 buy-button">
           KEMBALI

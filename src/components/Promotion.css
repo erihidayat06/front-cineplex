@@ -72,6 +72,10 @@
   height: 100px;
 }
 
+.card-costum {
+  background-color: #365260;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .promotion-heading {
