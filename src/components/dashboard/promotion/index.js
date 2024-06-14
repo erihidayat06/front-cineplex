@@ -19,6 +19,7 @@ const PromoList = () => {
     try {
       const response = await axios.get(`http://localhost:5000/api/promotion`);
       setPromos(response.data.promotions);
+
       setMovies(response.data.promotions);
     } catch (error) {
       console.error("There was an error fetching the Promos:", error);
@@ -29,6 +30,20 @@ const PromoList = () => {
     try {
       await axios.delete(`http://localhost:5000/api/Promos/${id}`);
       getPromos();
+      if (window.confirm("Are you sure you want to delete this time?")) {
+        const token = localStorage.getItem("token");
+        await axios.post(
+          `http://localhost:5000/api/promotion/delete/${id}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        getPromos();
+      }
     } catch (error) {
       console.error("There was an error deleting the Promo:", error);
     }
@@ -90,7 +105,7 @@ const PromoList = () => {
                     <i class="bi bi-pen"></i>
                   </button>
                   <button
-                    onClick={() => deletePromo(Promo.id_Promo)}
+                    onClick={() => deletePromo(Promo.id_promo)}
                     className="btn btn-danger btn-sm ms-2">
                     <i class="bi bi-trash"></i>
                   </button>

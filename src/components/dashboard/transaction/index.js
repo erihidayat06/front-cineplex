@@ -40,6 +40,16 @@ const TransactionsList = () => {
       );
     });
 
+  // Counting the number of transactions for each status
+  const countTransactions = (status) => {
+    return transactions.filter((transaction) => transaction.status === status)
+      .length;
+  };
+
+  const totalTransactions = transactions.length;
+  const totalProsesTransactions = countTransactions("PROSES");
+  const totalSuccessTransactions = countTransactions("SUCCES");
+
   return (
     <div className="container mt-5">
       <div className="d-flex justify-content-between mb-3">
@@ -73,6 +83,20 @@ const TransactionsList = () => {
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
+
+      <div className="card mb-3">
+        <div className="card-body">
+          <h5 className="card-title">Transaction Summary</h5>
+          <p className="card-text">Total Transactions: {totalTransactions}</p>
+          <p className="card-text">
+            Transactions in Process: {totalProsesTransactions}
+          </p>
+          <p className="card-text">
+            Successful Transactions: {totalSuccessTransactions}
+          </p>
+        </div>
+      </div>
+
       <div className="table-responsive">
         <table className="table table-striped table-bordered">
           <thead className="table-dark">
@@ -84,7 +108,7 @@ const TransactionsList = () => {
               <th>Movie</th>
               <th>UserName</th>
               <th>Phone</th>
-              <th>email</th>
+              <th>Email</th>
               <th>Total</th>
               <th>Seat</th>
               <th>Status</th>
