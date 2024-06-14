@@ -9,6 +9,7 @@ import { getById } from "../../services/api";
 import { useParams, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import LoadingAnimation from "../LoadingAnimation";
+import { getUser } from "../../services/auth";
 
 const MovieSchedule = () => {
   // Get ID from parameter URL
@@ -27,7 +28,7 @@ const MovieSchedule = () => {
     const getMovies = async () => {
       try {
         const moviesData = await getById(id);
-        console.log(moviesData); // Debugging line to check the fetched data
+
         setMovie(moviesData);
 
         const uniqueDates = [];
@@ -109,6 +110,14 @@ const MovieSchedule = () => {
   const totalRating = movie.votes.reduce((sum, vote) => sum + vote.rating, 0);
   const jumalahRating = (totalRating / totalReviews).toFixed(1);
   const averageRating = calculateAverageRating(movie.votes);
+
+  const userExists = (reviews, userId) => {
+    return reviews.some((review) => review.id_user === userId);
+  };
+
+  const token = localStorage.getItem("token");
+  const user = token ? getUser(token) : null;
+  const userIdToCheck = user ? user.userid : null;
 
   return (
     <div>
@@ -208,7 +217,7 @@ const MovieSchedule = () => {
                     <h4 className="text-start mt-5 mb-5 fw-bold">Picture</h4>
                     <div className="row row-cols-3 row-cols-lg-4">
                       {movie.pictures.map((pic) => (
-                        <div className="col">
+                        <div className="col mb-3">
                           <div className="card card-movie">
                             <img
                               src={imageBest(pic.picture)}
@@ -257,9 +266,15 @@ const MovieSchedule = () => {
                 <div className="tab-pane fade in active show" id="Section2">
                   <div className="d-flex justify-content-between align-items-center">
                     <h4>Review</h4>
-                    <Button variant="primary" onClick={handleShow}>
-                      Tambah Ulasan
-                    </Button>
+                    {userExists(movie.votes, userIdToCheck) ? (
+                      <Button variant="primary" disabled>
+                        Tambah Ulasan
+                      </Button>
+                    ) : (
+                      <Button variant="primary" onClick={handleShow}>
+                        Tambah Ulasan
+                      </Button>
+                    )}
                   </div>
                   <div className="d-flex align-items-center">
                     <span role="img" aria-label="star" className="text-warning">

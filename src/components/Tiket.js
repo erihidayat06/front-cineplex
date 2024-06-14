@@ -54,7 +54,7 @@ function Tiket() {
     try {
       await axios.put("http://localhost:5000/api/transaction/update", {
         order_id: order_id,
-        status: "SUCCESS", // Corrected status spelling
+        status: "SUCCES", // Corrected status spelling
       });
       console.log("Order status updated to SUCCESS");
     } catch (error) {
@@ -95,6 +95,7 @@ function Tiket() {
                   <thead>
                     <tr>
                       <th>Tanggal Order</th>
+                      <th>Id Transaction</th>
                       <th>Judul Film</th>
                       <th>Kursi</th>
                       <th>Tanggal Tonton</th>
@@ -106,12 +107,22 @@ function Tiket() {
                   <tbody>
                     <tr>
                       <td>{formatDate(trans.created_at)}</td>
+                      <td>{trans.id_transaction}</td>
                       <td>{trans.name_film}</td>
                       <td>{trans.seat}</td>
                       <td>{formatDate(trans.dated)}</td>
                       <td>{formatTime(trans.hour)}</td>
                       <td>{trans.total}</td>
-                      <td>{trans.status}</td>
+                      <td
+                        className={`fw-bold ${
+                          trans.status === "PROSES"
+                            ? "text-danger"
+                            : trans.status === "SUCCES"
+                            ? "text-success"
+                            : ""
+                        }`}>
+                        {trans.status}
+                      </td>
                     </tr>
                   </tbody>
                 </table>
